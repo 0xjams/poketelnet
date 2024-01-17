@@ -100,7 +100,6 @@ func main() {
 		log.Fatalln("Emoji file not available")
 	}
 
-	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
 
 	pokemonFile, err := os.Open("pokedex.json")
@@ -114,12 +113,6 @@ func main() {
 	json.Unmarshal(byteValue, &collection)
 	byteValue, _ = ioutil.ReadAll(pokemonFile)
 	json.Unmarshal(byteValue, &pokemonCollection)
-	/*for i := 0; i < len(pokemonCollection); i++ {
-
-		fmt.Println("User Type: " + pokemonCollection[i].Names.English)
-
-	}*/
-
 	var myHandler telnet.Handler = internalEchoHandler{}
 	err = telnet.ListenAndServe(":5555", myHandler)
 
@@ -136,7 +129,7 @@ func buildAlphabet(alphabet *[]Letter) {
 	randomNumbers = generateRandomNumber(0, len(collection)-1, 26)
 	var lowercaseStart = 97
 	for i := 0; i < len(randomNumbers); i++ {
-		//fmt.Println(collection[randomNumbers[i]].Char)
+		
 		var l Letter
 		l.emoji = collection[randomNumbers[i]]
 		l.letter = (byte)(lowercaseStart + i)
@@ -149,7 +142,6 @@ func getRandomPokemon() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	num := r.Intn(len(pokemonCollection) - 1)
 	pokemon = pokemonCollection[num].Names.English
-	//fmt.Println(pokemon)
 	re, _ := regexp.Compile(`[^\w]`)
 	pokemon = re.ReplaceAllString(pokemon, "")
 	if strings.Contains(pokemon, "nido") {
@@ -181,7 +173,7 @@ func printWordAsEmoji(word string, alphabet *[]Letter, w telnet.Writer) {
 func (handler internalEchoHandler) ServeTELNET(ctx telnet.Context, w telnet.Writer, r telnet.Reader) {
 	var alphabet []Letter
 	buildAlphabet(&alphabet)
-	var buffer [1]byte // Seems like the length of the buffer needs to be small, otherwise will have to wait for buffer to fill up.
+	var buffer [1]byte 
 	p := buffer[:]
 	s := ""
 	var j int
@@ -199,20 +191,19 @@ func (handler internalEchoHandler) ServeTELNET(ctx telnet.Context, w telnet.Writ
 		n, err := r.Read(p)
 
 		if n > 0 {
-			//oi.LongWrite(w, p[:n])
+			
 			sTmp := string(p[:n])
-			//print("aqui " + sTmp + "\n")
+			
 			s = s + sTmp
 			fmt.Println(s)
 			if s == "Hi\r\n" {
 				s = ""
-				//	fmt.Println("encerando1")
+				
 				oi.LongWriteString(w, "Hello to you too, bye\r\n")
 				return
 			}
 			if s == "pokemon\r\n" {
 				s = ""
-				//	fmt.Println("encerando1")
 				oi.LongWriteString(w, "Ah, I see you're a person of culture as well. That is not the answer, though. Bye\r\n")
 				return
 			}
@@ -246,7 +237,7 @@ func (handler internalEchoHandler) ServeTELNET(ctx telnet.Context, w telnet.Writ
 				}
 			}
 			if sTmp == "\n" {
-				//	fmt.Println("encerando2")
+				
 				s = ""
 			}
 		}
